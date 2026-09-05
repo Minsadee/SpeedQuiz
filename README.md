@@ -35,7 +35,7 @@ or tunnel. Easiest option: Cloudflare Tunnel.
 npm start
 
 # 2. In another terminal, expose it (no account needed for a quick tunnel)
-cloudflared tunnel --url http://localhost:3000
+cloudflared tunnel --url localhost:3000
 ```
 
 Cloudflare prints a public URL like `https://random-words.trycloudflare.com`.
