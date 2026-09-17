@@ -54,7 +54,7 @@ README.md
   Only the first correct answer per player per question counts.
 - Streak bonus: `+100 * (streakAfter - 1)` (2nd consecutive correct +100,
   3rd +200…). Any wrong answer or unanswered question resets streak to 0.
-- Wrong answer → no lockout, immediate retry (spam curbed by 5 answers/sec rate limit).
+- Wrong answer → 2 s lockout by default (`LOCKOUT_MS`, `LOCKOUT_MS=0` disables), then unlimited retries.
 - Last question worth double (base + bonus, then ×2).
 
 ## Answer matching (`isCorrect()`, exported for tests)
@@ -117,12 +117,12 @@ README.md
 - Frontend uses only relative URLs (`io()`, `app.css`, `host.js`) so the app
   works behind tunnels/proxies. Never hardcode `localhost` in `public/`.
 - Test-only env overrides exist: `QUESTION_TIME_MS`, `REVEAL_TIME_MS`,
-  `LEADERBOARD_TIME_MS`. Defaults are 15000/5000/5000.
+  `LEADERBOARD_TIME_MS`, `LOCKOUT_MS`. Defaults are 15000/5000/5000/2000.
 
 ## Testing
 
 No committed test suite. The full game was verified with a throwaway
-Socket.IO script (host + 2 players, 12 questions, wrong-answer retry,
+Socket.IO script (host + 2 players, 12 questions, wrong-answer lockout,
 reconnect, spectator, kick, play-again, host promotion) plus 12
 `isCorrect()` unit cases. To re-verify quickly:
 
