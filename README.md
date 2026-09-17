@@ -74,8 +74,9 @@ in `localStorage`.
 - Streak bonus: `+100 × (consecutive correct − 1)` — your 2nd correct answer
   in a row earns +100 extra, 3rd earns +200, etc. Any wrong answer or a
   question with no correct answer resets the streak to 0.
-- Wrong answer: locked out for 2 s ("wrong, try again"), then retry as often
-  as you like until the timer ends.
+- Wrong answer: locked out for 2 s by default ("wrong, try again"), then retry
+  as often as you like until the timer ends. Configurable via `LOCKOUT_MS`
+  (e.g. `LOCKOUT_MS=0` disables the lockout).
 - The last question is worth **double** (base + streak bonus, then ×2).
 
 ## Answer matching

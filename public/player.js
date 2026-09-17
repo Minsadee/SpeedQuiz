@@ -202,8 +202,8 @@
   });
 
   function showWrong(retryInMs) {
-    var s = Math.ceil((retryInMs || 2000) / 1000);
-    answerMsg.textContent = '✗ Wrong — try again in ' + s + 's';
+    var ms = (typeof retryInMs === 'number') ? retryInMs : 2000;
+    answerMsg.textContent = ms > 0 ? '✗ Wrong — try again in ' + Math.ceil(ms / 1000) + 's' : '✗ Wrong — try again!';
     answerMsg.className = 'answer-msg bad';
     answerMsg.hidden = false;
     answerInput.classList.remove('shake');
