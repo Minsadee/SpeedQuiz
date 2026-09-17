@@ -54,7 +54,7 @@ README.md
   Only the first correct answer per player per question counts.
 - Streak bonus: `+100 * (streakAfter - 1)` (2nd consecutive correct +100,
   3rd +200…). Any wrong answer or unanswered question resets streak to 0.
-- Wrong answer → 2 s lockout (`LOCKOUT_MS`), then unlimited retries.
+- Wrong answer → no lockout, immediate retry (spam curbed by 5 answers/sec rate limit).
 - Last question worth double (base + bonus, then ×2).
 
 ## Answer matching (`isCorrect()`, exported for tests)
@@ -122,7 +122,7 @@ README.md
 ## Testing
 
 No committed test suite. The full game was verified with a throwaway
-Socket.IO script (host + 2 players, 12 questions, wrong-answer lockout,
+Socket.IO script (host + 2 players, 12 questions, wrong-answer retry,
 reconnect, spectator, kick, play-again, host promotion) plus 12
 `isCorrect()` unit cases. To re-verify quickly:
 

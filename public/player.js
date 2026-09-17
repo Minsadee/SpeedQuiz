@@ -183,8 +183,8 @@
         answerMsg.className = 'answer-msg good';
         answerMsg.hidden = false;
         answerInput.disabled = true;
-      } else if (res.reason === 'wrong' || res.reason === 'locked') {
-        showWrong(res.retryInMs);
+      } else if (res.reason === 'wrong') {
+        showWrong();
       }
     });
   });
@@ -197,13 +197,12 @@
       answerMsg.hidden = false;
       answerInput.disabled = true;
     } else {
-      showWrong(r.retryInMs);
+      showWrong();
     }
   });
 
-  function showWrong(retryInMs) {
-    var s = Math.ceil((retryInMs || 2000) / 1000);
-    answerMsg.textContent = '✗ Wrong — try again in ' + s + 's';
+  function showWrong() {
+    answerMsg.textContent = '✗ Wrong — try again!';
     answerMsg.className = 'answer-msg bad';
     answerMsg.hidden = false;
     answerInput.classList.remove('shake');

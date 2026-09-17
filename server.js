@@ -18,7 +18,6 @@ const QUESTIONS_PER_GAME = 12;
 const QUESTION_TIME_MS = parseInt(process.env.QUESTION_TIME_MS || '15000', 10);
 const REVEAL_TIME_MS = parseInt(process.env.REVEAL_TIME_MS || '5000', 10);
 const LEADERBOARD_TIME_MS = parseInt(process.env.LEADERBOARD_TIME_MS || '5000', 10);
-const LOCKOUT_MS = 2000;
 const ROOM_EMPTY_TTL_MS = 5 * 60 * 1000;
 const MAX_NAME_LEN = 20;
 const MAX_ANSWER_LEN = 200;
@@ -400,7 +399,6 @@ function nextQuestion(room) {
   room.questionResults = new Map();
   room.questionStartTime = Date.now();
   room.questionEndsAt = room.questionStartTime + QUESTION_TIME_MS;
-  for (const p of room.players.values()) p.lockoutUntil = 0;
 
   io.to(room.code).emit('question', {
     index: room.qIndex,
@@ -448,10 +446,6 @@ function handleAnswer(room, player, rawAnswer) {
     return { ok: false, reason: 'rate-limited' };
   }
   player.answerTimes.push(now);
-  // Lockout after wrong answer
-  if (player.lockoutUntil && now < player.lockoutUntil) {
-    return { ok: false, reason: 'locked', retryInMs: player.lockoutUntil - now };
-  }
   // Already correct — only first correct counts
   const existing = room.questionResults.get(player.token);
   if (existing && existing.correct) return { ok: false, reason: 'already-correct' };
@@ -477,11 +471,11 @@ function handleAnswer(room, player, rawAnswer) {
     }
     return { ok: true, correct: true, points, elapsed };
   }
-  // Wrong: lock out 2s, may retry. Streak resets only at question end? Spec: resets on a wrong/no answer.
+  // Wrong: no lockout — player may retry immediately (spam is curbed by the
+  // 5 answers/sec rate limit above). Streak resets on a wrong/no answer.
   // Reset streak immediately on a wrong answer (subsequent correct in same question still counts as new streak start).
   player.streak = 0;
-  player.lockoutUntil = now + LOCKOUT_MS;
-  return { ok: false, correct: false, reason: 'wrong', retryInMs: LOCKOUT_MS };
+  return { ok: false, correct: false, reason: 'wrong' };
 }
 
 function endQuestion(room, early) {
@@ -589,7 +583,7 @@ io.on('connection', (socket) => {
       const player = {
         token, name, color: assignColor(room), score: 0, streak: 0,
         connected: true, socketId: socket.id, joinedAt: Date.now(),
-        spectator: false, lockoutUntil: 0, answerTimes: [],
+        spectator: false, answerTimes: [],
       };
       room.players.set(token, player);
       room.sockets.set(socket.id, token);
@@ -644,7 +638,7 @@ io.on('connection', (socket) => {
       const player = {
         token, name: finalName, color: assignColor(room), score: 0, streak: 0,
         connected: true, socketId: socket.id, joinedAt: Date.now(),
-        spectator: isMidGame, lockoutUntil: 0, answerTimes: [],
+        spectator: isMidGame, answerTimes: [],
       };
       room.players.set(token, player);
       room.sockets.set(socket.id, token);
@@ -687,9 +681,7 @@ io.on('connection', (socket) => {
     if (res.ok && res.correct) {
       socket.emit('answer-result', { correct: true, points: res.points, elapsed: res.elapsed });
     } else if (res.reason === 'wrong') {
-      socket.emit('answer-result', { correct: false, retryInMs: res.retryInMs });
-    } else if (res.reason === 'locked') {
-      socket.emit('answer-result', { correct: false, retryInMs: res.retryInMs, locked: true });
+      socket.emit('answer-result', { correct: false });
     }
   });
 

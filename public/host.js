@@ -183,9 +183,8 @@
         answerMsg.className = 'answer-msg good';
         answerMsg.hidden = false;
         answerInput.disabled = true;
-      } else if (res.reason === 'wrong' || res.reason === 'locked') {
-        var s = Math.ceil((res.retryInMs || 2000) / 1000);
-        answerMsg.textContent = '✗ Wrong — try again in ' + s + 's';
+      } else if (res.reason === 'wrong') {
+        answerMsg.textContent = '✗ Wrong — try again!';
         answerMsg.className = 'answer-msg bad';
         answerMsg.hidden = false;
         answerInput.classList.remove('shake');
@@ -203,8 +202,7 @@
       answerMsg.hidden = false;
       answerInput.disabled = true;
     } else {
-      var s = Math.ceil((r.retryInMs || 2000) / 1000);
-      answerMsg.textContent = '✗ Wrong — try again in ' + s + 's';
+      answerMsg.textContent = '✗ Wrong — try again!';
       answerMsg.className = 'answer-msg bad';
       answerMsg.hidden = false;
       answerInput.classList.remove('shake');
